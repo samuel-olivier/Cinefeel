@@ -4,9 +4,9 @@
 VideoDebugger::VideoDebugger(QObject *parent, bool display) :
     QObject(parent),
     _colorsWindow(new Ui_Colors()),
-    _display(display),
-    _API(new APIConnector("192.168.3.7:34000"))
+    _display(display)
 {
+    APIConnector* API = NULL;
     for (int i = 0; i < 4; ++i) {
         QMap<Color*, int> m;
         map.append(m);
@@ -17,11 +17,23 @@ VideoDebugger::VideoDebugger(QObject *parent, bool display) :
         QTime t;
         _timer.append(t);
         this->_timer[i].restart();
+        API = NULL;
+        if (i == 0) {
+            API = new APIConnector("192.168.3.16:34000");
+        } else if (i == 1){
+            API = new APIConnector("192.168.3.18:34000");
+        } else if (i == 2){
+            API = new APIConnector("192.168.3.7:34000");
+        } else if (i == 3){
+            API = new APIConnector("192.168.3.17:34000");
+        }
+        if (API != NULL) {
+            _APIs << API;
+        }
     }
     QWidget* wid = new QWidget(0);
     _colorsWindow->setupUi(wid);
     wid->show();
-    this->_API->setHost("192.168.43.170:34000");
 
     int divisions = 10;
     for (int r = 2; r < divisions; ++r) {
@@ -209,8 +221,8 @@ VideoDebugger::processFrame(QVideoFrame frame)
                 c.green= color.green();
                 c.blue = color.blue();
                 if (this->_timer[i].elapsed() > 1000 / 10 || c.distance(_average[i].red(), _average[i].green(), _average[i].blue()) > 120) {
-                    this->_API->setColor(_average[i]);
                     QPalette palette;
+                    this->_APIs[i]->setColor(_average[i]);
                     if (i == 0) {
                         palette.setColor(this->_colorsWindow->label_1->backgroundRole(), _average[i]);
                         palette.setColor(this->_colorsWindow->label_1->foregroundRole(), _average[i]);

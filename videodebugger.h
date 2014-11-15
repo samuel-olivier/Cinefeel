@@ -31,7 +31,7 @@ public slots:
 
 private:
     Ui_Colors           *_colorsWindow;
-    APIConnector        *_API;
+    QList<APIConnector*>_APIs;
     QList<QMap<Color*, int>>      map;
     QList<Color*>           _palet;
     QList<QTime>                 _timer;

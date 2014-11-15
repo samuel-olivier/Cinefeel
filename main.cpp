@@ -22,7 +22,7 @@ int             main(int argc, char *argv[])
     QTimer*         timer = new QTimer();
 
     probe->setSource(player);
-    player->setMedia(QUrl::fromLocalFile("C:/Users/louis/Desktop/Cinefeel/Video.avi"));
+    player->setMedia(QUrl::fromLocalFile("C:/Users/samuel/Documents/Dev/Cinefeel/Video.avi"));
 
     player->setVideoOutput(videoOutputWidget);
 
@@ -32,7 +32,7 @@ int             main(int argc, char *argv[])
 
     demo->connect(timer, SIGNAL(timeout()), SLOT(updateColor()));
     timer->start(1000 / 10);
-    demo->addAPIConnector(new APIConnector("192.168.43.254:34000"));
+    demo->addAPIConnector(new APIConnector("192.168.3.7:34000"));
 //    demo->addAPIConnector(new APIConnector("192.168.43.254:34000"));
 //    demo->addAPIConnector(new APIConnector("192.168.43.254:34000"));
 //    demo->addAPIConnector(new APIConnector("192.168.43.254:34000"));
