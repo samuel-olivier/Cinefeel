@@ -14,10 +14,12 @@ TEMPLATE = app
 
 SOURCES += main.cpp \
     videodebugger.cpp \
-    APIConnector.cpp
+    APIConnector.cpp \
+    color.cpp
 
 HEADERS  += \
     videodebugger.h \
-    APIConnector.h
+    APIConnector.h \
+    color.h
 
 FORMS    +=

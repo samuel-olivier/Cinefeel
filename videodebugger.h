@@ -5,11 +5,15 @@
 #include <QMediaPlayer>
 #include <QVideoFrame>
 #include <QDebug>
+#include <QMap>
+#include <QColor>
+#include <QPair>
 
 #include <QLabel>
 #include <QPalette>
 
 #include "APIConnector.h"
+#include "color.h"
 
 class VideoDebugger : public QObject
 {
@@ -22,12 +26,14 @@ signals:
 public slots:
     void        mediaCheck(QMediaPlayer::MediaStatus status);
     void        processFrame(QVideoFrame frame);
+    float clamp(float);
 
 private:
-    QLabel      *_label;
-    QPalette    _pal;
-    APIConnector    *_API;
-
+    QLabel              *_label;
+    QPalette            _pal;
+    APIConnector        *_API;
+    QMap<Color*, int>      map;
+    QList<Color*>           _palet;
 };
 
 #endif // VIDEODEBUGGER_H
