@@ -5,8 +5,9 @@ VideoDebugger::VideoDebugger(QObject *parent, bool display) :
     QObject(parent),
     _colorsWindow(new Ui_Colors()),
     _display(display),
-    _API(new APIConnector("192.168.3.7:34000"))
+    _API()
 {
+    QString ips[] = {"192.168.3.7:34000", "192.168.3.7:34000", "192.168.3.7:34000", "192.168.3.7:34000"};
     for (int i = 0; i < 4; ++i) {
         QMap<Color*, int> m;
         map.append(m);
@@ -17,11 +18,11 @@ VideoDebugger::VideoDebugger(QObject *parent, bool display) :
         QTime t;
         _timer.append(t);
         this->_timer[i].restart();
+        _API.append(new APIConnector(ips[i]));
     }
     QWidget* wid = new QWidget(0);
     _colorsWindow->setupUi(wid);
     wid->show();
-    this->_API->setHost("192.168.43.170:34000");
 
     int divisions = 10;
     for (int r = 2; r < divisions; ++r) {
@@ -209,7 +210,7 @@ VideoDebugger::processFrame(QVideoFrame frame)
                 c.green= color.green();
                 c.blue = color.blue();
                 if (this->_timer[i].elapsed() > 1000 / 10 || c.distance(_average[i].red(), _average[i].green(), _average[i].blue()) > 120) {
-                    this->_API->setColor(_average[i]);
+                    this->_API[i]->setColor(_average[i]);
                     QPalette palette;
                     if (i == 0) {
                         palette.setColor(this->_colorsWindow->label_1->backgroundRole(), _average[i]);
