@@ -22,7 +22,7 @@ int             main(int argc, char *argv[])
     QTimer*         timer = new QTimer();
 
     probe->setSource(player);
-    player->setMedia(QUrl::fromLocalFile("H:/UTorrent - Telechargement/Breaking Bad S1/S01E01-Breaking.Bad.avi"));
+    player->setMedia(QUrl::fromLocalFile("C:/Users/louis/Desktop/Cinefeel/Video.avi"));
 
     player->setVideoOutput(videoOutputWidget);
 
@@ -38,7 +38,7 @@ int             main(int argc, char *argv[])
 //    demo->addAPIConnector(new APIConnector("192.168.43.254:34000"));
     //demo.launch();
 
-    VideoDebugger   *videoDebugger = new VideoDebugger((QObject *)0, false);
+    VideoDebugger   *videoDebugger = new VideoDebugger((QObject *)0, true);
     QObject::connect(player, SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)), videoDebugger, SLOT(mediaCheck(QMediaPlayer::MediaStatus)));
     QObject::connect(probe, SIGNAL(videoFrameProbed(QVideoFrame)), videoDebugger, SLOT(processFrame(QVideoFrame)));
     return a.exec();
