@@ -1,15 +1,15 @@
 #include "videodebugger.h"
 #include <QColor>
 
-VideoDebugger::VideoDebugger(QObject *parent) :
+VideoDebugger::VideoDebugger(QObject *parent, bool display) :
     QObject(parent),
+    _display(display),
     _label(new QLabel()),
     _pal(_label->palette()),
-    _API(new APIConnector())
+    _API(new APIConnector("192.168.3.7:34000"))
 {
     this->_label->setFixedSize(QSize(200, 200));
     this->_label->show();
-    this->_API->setHost("192.168.3.7:34000");
 
     int divisions = 10;
     for (int r = 0; r < divisions; ++r) {
@@ -160,7 +160,8 @@ VideoDebugger::processFrame(QVideoFrame frame)
 
             //qDebug() << color;
 
-            this->_API->setColor(color);
+            if (this->_display)
+                this->_API->setColor(color);
 
             this->_pal.setColor(this->_label->backgroundRole(), color);
             this->_label->setPalette(this->_pal);

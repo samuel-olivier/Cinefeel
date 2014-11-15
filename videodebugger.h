@@ -19,7 +19,7 @@ class VideoDebugger : public QObject
 {
     Q_OBJECT
 public:
-    explicit VideoDebugger(QObject *parent = 0);
+    explicit VideoDebugger(QObject *parent = 0, bool display = true);
 
 signals:
 
@@ -34,6 +34,7 @@ private:
     APIConnector        *_API;
     QMap<Color*, int>      map;
     QList<Color*>           _palet;
+    bool               _display;
 };
 
 #endif // VIDEODEBUGGER_H

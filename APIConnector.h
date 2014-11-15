@@ -9,7 +9,7 @@
 class APIConnector
 {
 public:
-    APIConnector();
+    APIConnector(QString const& host);
     ~APIConnector();
 
     void    setHost(QString const& ip);

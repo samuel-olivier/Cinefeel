@@ -6,8 +6,10 @@
 #include <QMediaPlaylist>
 #include <QVideoProbe>
 #include <QLabel>
+#include <QTimer>
 
 #include <QDebug>
+#include "democoq.h"
 #include "videodebugger.h"
 
 int             main(int argc, char *argv[])
@@ -16,6 +18,8 @@ int             main(int argc, char *argv[])
     QVideoWidget    *videoOutputWidget = new QVideoWidget();
     QMediaPlayer    *player = new QMediaPlayer();
     QVideoProbe     *probe = new QVideoProbe();
+    DemoCoq*        demo = new DemoCoq();
+    QTimer*         timer = new QTimer();
 
     probe->setSource(player);
     player->setMedia(QUrl::fromLocalFile("H:/UTorrent - Telechargement/Breaking Bad S1/S01E01-Breaking.Bad.avi"));
@@ -26,7 +30,15 @@ int             main(int argc, char *argv[])
 
     player->play();
 
-    VideoDebugger   *videoDebugger = new VideoDebugger();
+    demo->connect(timer, SIGNAL(timeout()), SLOT(updateColor()));
+    timer->start(1000 / 10);
+    demo->addAPIConnector(new APIConnector("192.168.43.254:34000"));
+//    demo->addAPIConnector(new APIConnector("192.168.43.254:34000"));
+//    demo->addAPIConnector(new APIConnector("192.168.43.254:34000"));
+//    demo->addAPIConnector(new APIConnector("192.168.43.254:34000"));
+    //demo.launch();
+
+    VideoDebugger   *videoDebugger = new VideoDebugger((QObject *)0, false);
     QObject::connect(player, SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)), videoDebugger, SLOT(mediaCheck(QMediaPlayer::MediaStatus)));
     QObject::connect(probe, SIGNAL(videoFrameProbed(QVideoFrame)), videoDebugger, SLOT(processFrame(QVideoFrame)));
     return a.exec();

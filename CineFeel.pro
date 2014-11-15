@@ -15,11 +15,13 @@ TEMPLATE = app
 SOURCES += main.cpp \
     videodebugger.cpp \
     APIConnector.cpp \
-    color.cpp
+    color.cpp \
+    democoq.cpp
 
 HEADERS  += \
     videodebugger.h \
     APIConnector.h \
-    color.h
+    color.h \
+    democoq.h
 
 FORMS    +=
