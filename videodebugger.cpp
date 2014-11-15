@@ -1,10 +1,11 @@
 #include "videodebugger.h"
 #include <QColor>
 
-VideoDebugger::VideoDebugger(QObject *parent) :
+VideoDebugger::VideoDebugger(QObject *parent, bool display) :
     QObject(parent),
     _colorsWindow(new Ui_Colors()),
-    _API(new APIConnector())
+    _display(display),
+    _API(new APIConnector("192.168.3.7:34000"))
 {
     for (int i = 0; i < 4; ++i) {
         QMap<Color*, int> m;
@@ -230,7 +231,6 @@ VideoDebugger::processFrame(QVideoFrame frame)
                     this->_timer[i].restart();
                 }
             }
-
         }
         frame.unmap();
     }

@@ -20,7 +20,7 @@ class VideoDebugger : public QObject
 {
     Q_OBJECT
 public:
-    explicit VideoDebugger(QObject *parent = 0);
+    explicit VideoDebugger(QObject *parent = 0, bool display = true);
 
 signals:
 
@@ -37,6 +37,7 @@ private:
     QList<QTime>                 _timer;
     QList<QList<QColor>>        _lastColors;
     QList<QColor>               _average;
+    bool               _display;
 };
 
 #endif // VIDEODEBUGGER_H

@@ -2,11 +2,12 @@
 
 #include <QDebug>
 
-APIConnector::APIConnector()
+APIConnector::APIConnector(QString const& host)
     : _networkManager(new QNetworkAccessManager())
 {
     _templateRequest.setRawHeader("User-Agent", "CineFeelBrowser 1.0");
     _templateRequest.setRawHeader("Content-Type", "application/json");
+    _host = host;
 }
 
 APIConnector::~APIConnector()
