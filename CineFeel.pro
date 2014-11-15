@@ -1,22 +1,23 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2014-11-14T23:49:40
+# Project created by QtCreator 2014-11-14T23:51:45
 #
 #-------------------------------------------------
 
-QT       += core gui network
+QT       += core gui multimedia multimediawidgets network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = CineFeel
+TARGET = TestAnalyseMoyenneVideo
 TEMPLATE = app
 
 
-SOURCES += main.cpp\
-        MainWindow.cpp \
+SOURCES += main.cpp \
+    videodebugger.cpp \
     APIConnector.cpp
 
-HEADERS  += MainWindow.h \
+HEADERS  += \
+    videodebugger.h \
     APIConnector.h
 
-FORMS    += MainWindow.ui
+FORMS    +=

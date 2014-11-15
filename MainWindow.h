@@ -2,8 +2,6 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "APIConnector.h"
-#include <QTime>
 
 namespace Ui {
 class MainWindow;
@@ -17,13 +15,8 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-private slots:
-    void    updateColor();
-
 private:
-    Ui::MainWindow* ui;
-    APIConnector*   _api;
-    QTime           _start;
+    Ui::MainWindow *ui;
 };
 
 #endif // MAINWINDOW_H
