@@ -30,6 +30,7 @@ VideoDebugger::VideoDebugger(QObject *parent, bool display) :
         if (API != NULL) {
             _APIs << API;
         }
+        _APIs.append(API);
     }
     QWidget* wid = new QWidget(0);
     _colorsWindow->setupUi(wid);
@@ -221,8 +222,8 @@ VideoDebugger::processFrame(QVideoFrame frame)
                 c.green= color.green();
                 c.blue = color.blue();
                 if (this->_timer[i].elapsed() > 1000 / 10 || c.distance(_average[i].red(), _average[i].green(), _average[i].blue()) > 120) {
-                    QPalette palette;
                     this->_APIs[i]->setColor(_average[i]);
+                    QPalette palette;
                     if (i == 0) {
                         palette.setColor(this->_colorsWindow->label_1->backgroundRole(), _average[i]);
                         palette.setColor(this->_colorsWindow->label_1->foregroundRole(), _average[i]);
