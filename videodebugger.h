@@ -14,6 +14,7 @@
 
 #include "APIConnector.h"
 #include "color.h"
+#include "ui_form.h"
 
 class VideoDebugger : public QObject
 {
@@ -29,14 +30,13 @@ public slots:
     float        clamp(float);
 
 private:
-    QLabel              *_label;
-    QPalette            _pal;
+    Ui_Colors           *_colorsWindow;
     APIConnector        *_API;
-    QMap<Color*, int>      map;
+    QList<QMap<Color*, int>>      map;
     QList<Color*>           _palet;
-    QTime               _timer;
-    QList<QColor>        _lastColors;
-    QColor               _average;
+    QList<QTime>                 _timer;
+    QList<QList<QColor>>        _lastColors;
+    QList<QColor>               _average;
 };
 
 #endif // VIDEODEBUGGER_H

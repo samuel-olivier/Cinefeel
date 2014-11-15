@@ -22,4 +22,5 @@ HEADERS  += \
     APIConnector.h \
     color.h
 
-FORMS    +=
+FORMS    += \
+    form.ui

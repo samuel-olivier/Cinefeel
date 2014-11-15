@@ -3,12 +3,23 @@
 
 VideoDebugger::VideoDebugger(QObject *parent) :
     QObject(parent),
-    _label(new QLabel()),
-    _pal(_label->palette()),
+    _colorsWindow(new Ui_Colors()),
     _API(new APIConnector())
 {
-    this->_label->setFixedSize(QSize(200, 200));
-    this->_label->show();
+    for (int i = 0; i < 4; ++i) {
+        QMap<Color*, int> m;
+        map.append(m);
+        QColor c = QColor(0, 0, 0);
+        _average.append(c);
+        QList<QColor> lc;
+        _lastColors.append(lc);
+        QTime t;
+        _timer.append(t);
+        this->_timer[i].restart();
+    }
+    QWidget* wid = new QWidget(0);
+    _colorsWindow->setupUi(wid);
+    wid->show();
     this->_API->setHost("192.168.43.170:34000");
 
     int divisions = 10;
@@ -25,8 +36,12 @@ VideoDebugger::VideoDebugger(QObject *parent) :
             }
         }
     }
-    this->_timer.restart();
-    this->_average = QColor(0, 0, 0);
+
+    this->_colorsWindow->label_1->setAutoFillBackground(true);
+    this->_colorsWindow->label_2->setAutoFillBackground(true);
+    this->_colorsWindow->label_3->setAutoFillBackground(true);
+    this->_colorsWindow->label_4->setAutoFillBackground(true);
+
 }
 
 void
@@ -50,7 +65,12 @@ VideoDebugger::processFrame(QVideoFrame frame)
         {
             count++;
 
-            this->map.clear();
+            for (int i = 0; i < 4; ++i) {
+                this->map[i].clear();
+                for (Color* color : _palet) {
+                    this->map[i][color] = 0;
+                }
+            }
             uchar *bits = frame.bits();
             float Y, U, V;
             float R, G, B;
@@ -110,7 +130,6 @@ VideoDebugger::processFrame(QVideoFrame frame)
                 image.save("C:/Users/louis/Documents/Rendu/test.png");
             }
 
-            QColor    color;
 
             int sampleNumber = 0;
             for (int x = 0 ; x < frame.width() ; x += 20) {
@@ -136,58 +155,81 @@ VideoDebugger::processFrame(QVideoFrame frame)
                             }
                         }
                         if (best) {
-                            if (map.contains(best)) {
-                                map[best] += 1;
-                            } else {
-                                map[best] = 1;
+                            if (x < frame.width() / 2 && y < frame.height() / 2) {
+                                map[0][best] += 1;
+                            }
+                            else if (x >= frame.width() / 2 && y < frame.height() / 2) {
+                                map[1][best] += 1;
+                            }
+                            else if (x < frame.width() / 2 && y >= frame.height() / 2) {
+                                map[2][best] += 1;
+                            }
+                            else {
+                                map[3][best] += 1;
                             }
                         }
                     }
                 }
             }
 
-            int count = 0;
-            int frequentColor;
+            for (int i = 0; i < 4; ++i) {
+                QColor    color;
+                int count = 0;
+                for (QMap<Color*, int>::iterator it = map[i].begin(); it != map[i].end(); ++it) {
+                    if (it.value() > count) {
+                        count = it.value();
 
-            for (QMap<Color*, int>::iterator it = map.begin(); it != map.end(); ++it) {
-                if (it.value() > count) {
-                    count = it.value();
 
+                        color.setRed(it.key()->red);
+                        color.setGreen(it.key()->green);
+                        color.setBlue(it.key()->blue);
 
-                    color.setRed(it.key()->red);
-                    color.setGreen(it.key()->green);
-                    color.setBlue(it.key()->blue);
+                    }
+                }
 
+                this->_lastColors[i].push_back(color);
+                int size = this->_lastColors[i].size();
+
+                if (size > 5) {
+                    this->_average[i].setRed(clamp((this->_average[i].red() * (size - 1) - this->_lastColors[i].first().red() + color.red()) / (size - 1)));
+                    this->_average[i].setGreen(clamp((this->_average[i].green() * (size - 1) - this->_lastColors[i].first().green() + color.green()) / (size - 1)));
+                    this->_average[i].setBlue(clamp((this->_average[i].blue() * (size - 1) - this->_lastColors[i].first().blue() + color.blue()) / (size - 1)));
+                    this->_lastColors[i].removeFirst();
+                } else if (size == 1) {
+                    this->_average[i] = color;
+                } else {
+                    this->_average[i].setRed((this->_average[i].red() * (size - 1) + color.red()) / size);
+                    this->_average[i].setGreen((this->_average[i].green() * (size - 1) + color.green()) / size);
+                    this->_average[i].setBlue((this->_average[i].blue() * (size - 1) + color.blue()) / size);
+                }
+
+                Color c;
+                c.red = color.red();
+                c.green= color.green();
+                c.blue = color.blue();
+                if (this->_timer[i].elapsed() > 1000 / 10 || c.distance(_average[i].red(), _average[i].green(), _average[i].blue()) > 120) {
+                    this->_API->setColor(_average[i]);
+                    QPalette palette;
+                    if (i == 0) {
+                        palette.setColor(this->_colorsWindow->label_1->backgroundRole(), _average[i]);
+                        palette.setColor(this->_colorsWindow->label_1->foregroundRole(), _average[i]);
+                        this->_colorsWindow->label_1->setPalette(palette);
+                    } else if (i == 1) {
+                        palette.setColor(this->_colorsWindow->label_2->backgroundRole(), _average[i]);
+                        palette.setColor(this->_colorsWindow->label_2->foregroundRole(), _average[i]);
+                        this->_colorsWindow->label_2->setPalette(palette);
+                    } else if (i == 2) {
+                        palette.setColor(this->_colorsWindow->label_3->backgroundRole(), _average[i]);
+                        palette.setColor(this->_colorsWindow->label_3->foregroundRole(), _average[i]);
+                        this->_colorsWindow->label_3->setPalette(palette);
+                    } else {
+                        palette.setColor(this->_colorsWindow->label_4->backgroundRole(), _average[i]);
+                        palette.setColor(this->_colorsWindow->label_4->foregroundRole(), _average[i]);
+                        this->_colorsWindow->label_4->setPalette(palette);
+                    }
+                    this->_timer[i].restart();
                 }
             }
-
-            this->_lastColors.push_back(color);
-            int size = this->_lastColors.size();
-
-            if (size > 7) {
-                this->_average.setRed(clamp((this->_average.red() * (size - 1) - this->_lastColors.first().red() + color.red()) / (size - 1)));
-                this->_average.setGreen(clamp((this->_average.green() * (size - 1) - this->_lastColors.first().green() + color.green()) / (size - 1)));
-                this->_average.setBlue(clamp((this->_average.blue() * (size - 1) - this->_lastColors.first().blue() + color.blue()) / (size - 1)));
-                this->_lastColors.removeFirst();
-            } else if (size == 1) {
-                this->_average = color;
-            } else {
-                this->_average.setRed((this->_average.red() * (size - 1) + color.red()) / size);
-                this->_average.setGreen((this->_average.green() * (size - 1) + color.green()) / size);
-                this->_average.setBlue((this->_average.blue() * (size - 1) + color.blue()) / size);
-            }
-
-            Color c;
-            c.red = color.red();
-            c.green= color.green();
-            c.blue = color.blue();
-            if (this->_timer.elapsed() > 1000 / 10 || c.distance(_average.red(), _average.green(), _average.blue()) > 120) {
-                this->_API->setColor(_average);
-                this->_pal.setColor(this->_label->backgroundRole(), _average);
-                this->_label->setPalette(this->_pal);
-                this->_timer.restart();
-            }
-
 
         }
         frame.unmap();
