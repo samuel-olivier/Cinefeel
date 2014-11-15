@@ -11,7 +11,7 @@ VideoDebugger::VideoDebugger(QObject *parent) :
     this->_label->show();
     this->_API->setHost("192.168.3.7:34000");
 
-    int divisions = 4;
+    int divisions = 10;
     for (int r = 0; r < divisions; ++r) {
         for (int g = 0; g < divisions; ++g) {
             for (int b = 0; b < divisions; ++b) {
@@ -42,7 +42,7 @@ VideoDebugger::processFrame(QVideoFrame frame)
 {
     if (frame.map(QAbstractVideoBuffer::ReadOnly) == true)
     {
-        qDebug() << frame.pixelFormat();
+        //qDebug() << frame.pixelFormat();
         if (frame.isReadable() == true)
         {
             count++;
@@ -52,13 +52,10 @@ VideoDebugger::processFrame(QVideoFrame frame)
             float Y, U, V;
             float R, G, B;
 
-            int incrX = 0;
-            int incrY = 0;
-
-            if (count == 500) {
+            if (false && count == 200) {
                 QImage image(frame.width(), frame.height(), QImage::Format_RGB32);
-                for (int y = 0 ; y < frame.width() ; y += 1) {
-                    for (int x = 0, incrX = 0 ; x < frame.height() ; x += 1) {/*
+                for (int x = 0 ; x < frame.width() ; x += 1) {
+                    for (int y = 0 ; y < frame.height() ; y += 1) {/*
                        const int xx = x >> 1;
                        const int yy = y >> 1;
                        const int Y = frame.data[0][y * frame.linesize[0] + x] - 16;
@@ -68,38 +65,41 @@ VideoDebugger::processFrame(QVideoFrame frame)
                        const int g = qBound(0, (298 * Y - 100 * U - 208 * V + 128) >> 8, 255);
                        const int b = qBound(0, (298 * Y + 516 * U           + 128) >> 8, 255);*/
 
+
+
                         Y = bits[x + y * frame.width()];
+                        U = bits[frame.width() * frame.height() + 2 * (x / 2 + (y / 2) * (frame.width() / 2))];
+                        V = bits[frame.width() * frame.height() + 2 * ((x / 2 + (y / 2) * (frame.width() / 2))) + 1];
 
-                        if (x % 4 == 0)
-                            incrX += 1;
-                        if (y % 4 == 0)
-                            incrY += 1;
-
-                        U = bits[frame.width() * frame.height() + (incrX + incrY * frame.width()) + 0] - 128;
-                        V = bits[frame.width() * frame.height() + (incrX + incrY * frame.width()) + 1] - 128;
 
  //                       V = bits[frame.width() * frame.height() + frame.width() * frame.height() / 4 + (x + y * frame.width()) / 4] - 128;
 
 
-                        /*B = this->clamp(1.164*(Y - 16) + 2.018*(U - 128));
-                        G = this->clamp(1.164*(Y - 16) - 0.813*(V - 128) - 0.391*(U - 128));
-                        R = this->clamp(1.164*(Y - 16) + 1.596*(V - 128));*/
+//                        R = this->clamp(1.164*(Y - 16) + 1.596*(V - 128));
+//                        G = this->clamp(1.164*(Y - 16) - 0.813*(V - 128) - 0.391*(U - 128));
+//                        B = this->clamp(1.164*(Y - 16) + 2.018*(U - 128));
 
 //                        R = 1.164 * (Y-16) + 1.596*(V - 128);
 //                        G = 1.164 * (Y-16) - 0.813 * (V - 128) - 0.391 * (U - 128);
 //                        B = 1.164 * (Y-16) + 2.018 * (U - 128);
 
-                        R = Y + 1.402 * V;
-                        G = Y - 0.34414 * U - 0.71414 * V;
-                        B = Y + 1.772 * U;
+//                        R = Y + 1.402 * V;
+//                        G = Y - 0.34414 * U - 0.71414 * V;
+//                        B = Y + 1.772 * U;
 
 //                        R = Y + 1.402 * (V - 128);
 //                        G = Y - 0.34414 * (Y - 128) - 0.71414 * (V - 128);
 //                        B = Y + 1.772 * (U - 128);
 
-//                        R = this->clamp(Y + 1.13983 * V);
+//                        R = this->clamp(Y + V * 1.13983);
 //                        G = this->clamp(Y - 0.39465 * U - 0.58060 * V);
 //                        B = this->clamp(Y + 2.03211 * U);
+
+                        R = Y + 1.4075 * (V - 128);
+                        G = Y - 0.3455 * (U - 128) - (0.7169 * (V - 128));
+                        B = Y + 1.7790 * (U - 128);
+
+                        //qDebug() << Y << U << V << R << G << B;
 
                         image.setPixel(x, y, QColor(R, G, B).rgb());
                     }
@@ -115,16 +115,12 @@ VideoDebugger::processFrame(QVideoFrame frame)
                     sampleNumber++;
 
                     Y = bits[x + y * frame.width()];
-                    U = bits[frame.width() * frame.height() + (x + y * frame.width()) / 4] - 128;
-                    V = bits[frame.width() * frame.height() + frame.width() * frame.height() / 4 + (x + y * frame.width()) / 4] - 128;
+                    U = bits[frame.width() * frame.height() + 2 * (x / 2 + (y / 2) * (frame.width() / 2))];
+                    V = bits[frame.width() * frame.height() + 2 * ((x / 2 + (y / 2) * (frame.width() / 2))) + 1];
 
-                    /*
-                    B = this->clamp(1.164*(Y - 16) + 2.018*(U - 128));
-                    G = this->clamp(1.164*(Y - 16) - 0.813*(V - 128) - 0.391*(U - 128));
-                    R = this->clamp(1.164*(Y - 16) + 1.596*(V - 128));*/
-                    R = this->clamp(Y + 1.13983 * V);
-                    G = this->clamp(Y - 0.39465 * U - 0.58060 * V);
-                    B = this->clamp(Y + 2.03211 * U);
+                    R = Y + 1.4075 * (V - 128);
+                    G = Y - 0.3455 * (U - 128) - (0.7169 * (V - 128));
+                    B = Y + 1.7790 * (U - 128);
 
                     if (R >= 0 && G >= 0 && B >= 0 ) {
                         int min = -1;
@@ -162,7 +158,7 @@ VideoDebugger::processFrame(QVideoFrame frame)
                 }
             }
 
-            qDebug() << color;
+            //qDebug() << color;
 
             this->_API->setColor(color);
 
