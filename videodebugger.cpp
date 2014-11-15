@@ -9,7 +9,7 @@ VideoDebugger::VideoDebugger(QObject *parent) :
 {
     this->_label->setFixedSize(QSize(200, 200));
     this->_label->show();
-    this->_API->setHost("192.168.3.7:34000");
+    this->_API->setHost("192.168.43.170:34000");
 
     int divisions = 10;
     for (int r = 2; r < divisions; ++r) {
@@ -177,10 +177,17 @@ VideoDebugger::processFrame(QVideoFrame frame)
                 this->_average.setBlue((this->_average.blue() * (size - 1) + color.blue()) / size);
             }
 
-            this->_API->setColor(_average);
+            Color c;
+            c.red = color.red();
+            c.green= color.green();
+            c.blue = color.blue();
+            if (this->_timer.elapsed() > 1000 / 10 || c.distance(_average.red(), _average.green(), _average.blue()) > 120) {
+                this->_API->setColor(_average);
+                this->_pal.setColor(this->_label->backgroundRole(), _average);
+                this->_label->setPalette(this->_pal);
+                this->_timer.restart();
+            }
 
-            this->_pal.setColor(this->_label->backgroundRole(), _average);
-            this->_label->setPalette(this->_pal);
 
         }
         frame.unmap();
