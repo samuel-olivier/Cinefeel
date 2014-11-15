@@ -8,7 +8,7 @@
 #include <QMap>
 #include <QColor>
 #include <QPair>
-
+#include <QTime>
 #include <QLabel>
 #include <QPalette>
 
@@ -26,7 +26,7 @@ signals:
 public slots:
     void        mediaCheck(QMediaPlayer::MediaStatus status);
     void        processFrame(QVideoFrame frame);
-    float clamp(float);
+    float        clamp(float);
 
 private:
     QLabel              *_label;
@@ -34,6 +34,9 @@ private:
     APIConnector        *_API;
     QMap<Color*, int>      map;
     QList<Color*>           _palet;
+    QTime               _timer;
+    QList<QColor>        _lastColors;
+    QColor               _average;
 };
 
 #endif // VIDEODEBUGGER_H

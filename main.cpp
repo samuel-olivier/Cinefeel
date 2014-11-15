@@ -18,7 +18,7 @@ int             main(int argc, char *argv[])
     QVideoProbe     *probe = new QVideoProbe();
 
     probe->setSource(player);
-    player->setMedia(QUrl::fromLocalFile("H:/UTorrent - Telechargement/Breaking Bad S1/S01E01-Breaking.Bad.avi"));
+    player->setMedia(QUrl::fromLocalFile("C:/Users/samuel/Documents/Dev/Cinefeel/Video.mp4"));
 
     player->setVideoOutput(videoOutputWidget);
 

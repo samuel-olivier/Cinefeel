@@ -12,18 +12,21 @@ VideoDebugger::VideoDebugger(QObject *parent) :
     this->_API->setHost("192.168.3.7:34000");
 
     int divisions = 10;
-    for (int r = 0; r < divisions; ++r) {
-        for (int g = 0; g < divisions; ++g) {
-            for (int b = 0; b < divisions; ++b) {
+    for (int r = 2; r < divisions; ++r) {
+        for (int g = 2; g < divisions; ++g) {
+            for (int b = 2; b < divisions; ++b) {
                 Color* color = new Color();
                 color->red = r * 255 / (divisions - 1);
                 color->green = g * 255 / (divisions - 1);
                 color->blue = b * 255 / (divisions - 1);
 
-                _palet.append(color);
+                if (qAbs(r - b) > 0 || qAbs(r - g) > 0)
+                    _palet.append(color);
             }
         }
     }
+    this->_timer.restart();
+    this->_average = QColor(0, 0, 0);
 }
 
 void
@@ -122,7 +125,7 @@ VideoDebugger::processFrame(QVideoFrame frame)
                     G = Y - 0.3455 * (U - 128) - (0.7169 * (V - 128));
                     B = Y + 1.7790 * (U - 128);
 
-                    if (R >= 0 && G >= 0 && B >= 0 ) {
+                    if (R >= 30 && G >= 30 && B >= 30 && (qAbs(R - G) > 30 || qAbs(R - B) > 30)) {
                         int min = -1;
                         Color* best = NULL;
                         for (Color* color : _palet) {
@@ -158,11 +161,25 @@ VideoDebugger::processFrame(QVideoFrame frame)
                 }
             }
 
-            //qDebug() << color;
+            this->_lastColors.push_back(color);
+            int size = this->_lastColors.size();
 
-            this->_API->setColor(color);
+            if (size > 7) {
+                this->_average.setRed(clamp((this->_average.red() * (size - 1) - this->_lastColors.first().red() + color.red()) / (size - 1)));
+                this->_average.setGreen(clamp((this->_average.green() * (size - 1) - this->_lastColors.first().green() + color.green()) / (size - 1)));
+                this->_average.setBlue(clamp((this->_average.blue() * (size - 1) - this->_lastColors.first().blue() + color.blue()) / (size - 1)));
+                this->_lastColors.removeFirst();
+            } else if (size == 1) {
+                this->_average = color;
+            } else {
+                this->_average.setRed((this->_average.red() * (size - 1) + color.red()) / size);
+                this->_average.setGreen((this->_average.green() * (size - 1) + color.green()) / size);
+                this->_average.setBlue((this->_average.blue() * (size - 1) + color.blue()) / size);
+            }
 
-            this->_pal.setColor(this->_label->backgroundRole(), color);
+            this->_API->setColor(_average);
+
+            this->_pal.setColor(this->_label->backgroundRole(), _average);
             this->_label->setPalette(this->_pal);
 
         }
