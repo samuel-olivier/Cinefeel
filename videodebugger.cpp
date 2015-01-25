@@ -7,7 +7,7 @@ VideoDebugger::VideoDebugger(QObject *parent, bool display) :
     _display(display),
     _API()
 {
-    QString ips[] = {"192.168.3.7:34000", "192.168.3.7:34000", "192.168.3.7:34000", "192.168.3.7:34000"};
+    QString ips[] = {"192.168.3.7:34000", "192.168.3.8:34000", "192.168.3.8:34000", "192.168.3.8:34000"};
     for (int i = 0; i < 4; ++i) {
         QMap<Color*, int> m;
         map.append(m);
@@ -211,22 +211,32 @@ VideoDebugger::processFrame(QVideoFrame frame)
                 c.blue = color.blue();
                 if (this->_timer[i].elapsed() > 1000 / 10 || c.distance(_average[i].red(), _average[i].green(), _average[i].blue()) > 120) {
                     this->_API[i]->setColor(_average[i]);
+                    float percent = (float)count / (20.0);
+                    if (percent > 1.0)
+                        percent = 1.0;
+                    this->_API[i]->setBrightness(/*percent * */100);
+                    this->_API[i]->setTemperature(100);
+                    qDebug() << count;
                     QPalette palette;
+                    QColor newColor = _average[i];
+                    newColor.setRed((float)newColor.red() * percent);
+                    newColor.setGreen((float)newColor.green() * percent);
+                    newColor.setBlue((float)newColor.blue() * percent);
                     if (i == 0) {
-                        palette.setColor(this->_colorsWindow->label_1->backgroundRole(), _average[i]);
-                        palette.setColor(this->_colorsWindow->label_1->foregroundRole(), _average[i]);
+                        palette.setColor(this->_colorsWindow->label_1->backgroundRole(), newColor);
+                        palette.setColor(this->_colorsWindow->label_1->foregroundRole(), newColor);
                         this->_colorsWindow->label_1->setPalette(palette);
                     } else if (i == 1) {
-                        palette.setColor(this->_colorsWindow->label_2->backgroundRole(), _average[i]);
-                        palette.setColor(this->_colorsWindow->label_2->foregroundRole(), _average[i]);
+                        palette.setColor(this->_colorsWindow->label_2->backgroundRole(), newColor);
+                        palette.setColor(this->_colorsWindow->label_2->foregroundRole(), newColor);
                         this->_colorsWindow->label_2->setPalette(palette);
                     } else if (i == 2) {
-                        palette.setColor(this->_colorsWindow->label_3->backgroundRole(), _average[i]);
-                        palette.setColor(this->_colorsWindow->label_3->foregroundRole(), _average[i]);
+                        palette.setColor(this->_colorsWindow->label_3->backgroundRole(), newColor);
+                        palette.setColor(this->_colorsWindow->label_3->foregroundRole(), newColor);
                         this->_colorsWindow->label_3->setPalette(palette);
                     } else {
-                        palette.setColor(this->_colorsWindow->label_4->backgroundRole(), _average[i]);
-                        palette.setColor(this->_colorsWindow->label_4->foregroundRole(), _average[i]);
+                        palette.setColor(this->_colorsWindow->label_4->backgroundRole(), newColor);
+                        palette.setColor(this->_colorsWindow->label_4->foregroundRole(), newColor);
                         this->_colorsWindow->label_4->setPalette(palette);
                     }
                     this->_timer[i].restart();
